@@ -1,2 +1,2 @@
-worker: python forward.py
+worker: python3 forward.py
 
