@@ -1,33 +1,35 @@
-from pyrogram import Client, filters
-import time
+import asyncio
+from pyrogram import Client, filters, idle
 
-api_id = 39218730
-api_hash = "97ac27160280bf3ece3c3fb85ae22123"
+# YOUR DETAILS (already filled)
+API_ID = 39218730
+API_HASH = "97ac27160280bf3ece3c3fb85ae22123"
+PHONE_NUMBER = "+916305571497"
 
-SOURCE = -1001912679284
-DEST = -1003793224429
+SOURCE = -1003798031630
+DESTINATION = -1003793224429
 
+# Create client
 app = Client(
-    "my_session",
-    api_id=api_id,
-    api_hash=api_hash,
-    sleep_threshold=30,
-    workers=10
+    "userbot_session",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    phone_number=PHONE_NUMBER
 )
 
+# Copy messages (NO forward tag)
 @app.on_message(filters.chat(SOURCE))
-def forward(client, message):
+async def forward_message(client, message):
     try:
-        client.copy_message(
-            chat_id=DEST,
-            from_chat_id=SOURCE,
-            message_id=message.id
-        )
-        print("Forwarded successfully")
-
+        await message.copy(DESTINATION)
+        print(f"Copied message {message.id}")
     except Exception as e:
-        print("Error:", e)
-        time.sleep(5)
+        print(f"Error: {e}")
 
-print("Userbot started...")
-app.run()
+# Start bot
+async def main():
+    await app.start()
+    print("✅ Userbot running perfectly and forwarding messages...")
+    await idle()
+
+asyncio.run(main())
