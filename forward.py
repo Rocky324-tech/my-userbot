@@ -1,22 +1,19 @@
-from pyrogram import Client, filters
-import asyncio
+import os
+from telethon import TelegramClient
+from telethon.sessions import StringSession
 
-api_id = 39218730
-api_hash = "97ac27160280bf3ece3c3fb85ae22123"
+api_id = int(os.getenv("API_ID"))
+api_hash = os.getenv("API_HASH")
+session = os.getenv("SESSION")
 
-source_chat = -1003798031630
-destination_chat = -1003793224429
+source = int(os.getenv("SOURCE"))
+destination = int(os.getenv("DESTINATION"))
 
-app = Client("my_session", api_id=api_id, api_hash=api_hash)
+client = TelegramClient(StringSession(session), api_id, api_hash)
 
-@app.on_message(filters.chat(source_chat))
-async def forward(client, message):
-    try:
-        await message.copy(destination_chat)
-        print("Message forwarded instantly")
-    except Exception as e:
-        print(e)
+@client.on(events.NewMessage(chats=source))
+async def handler(event):
+    await client.send_message(destination, event.message)
 
-print("Userbot running 24/7 perfectly...")
-
-app.run()
+client.start()
+client.run_until_disconnected()
