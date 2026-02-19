@@ -1,30 +1,42 @@
 from pyrogram import Client, filters
 import asyncio
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
 API_ID = 39218730
 API_HASH = "97ac27160280bf3ece3c3fb85ae22123"
-
-SESSION_STRING = "BQJWbioAdeOTcPy1ha-lnt_D1QkWJzHMADFHY65HchvZ_ft08GuIVo9FoCYxCCrhCGWjjCfJv_IXr8m5N6LRv1xeWBtLoywM6fmprUBKAzIN4tSeokjWUDlwzI1j8bj-U6sB0WkVxtH1jiWk2W6MqdKwWdrdSCGz0bAqmF2UFm_gdMy8LR-zIqIF7h90ONYPgY-qfBH8zIQVEP_NXv6fLTr03t8QnsBLbEcfoNrgca5mQ0NwGQcmuuOtO0fMC49-dwd9QWKjAKZAGi2W9Dni4hVtR9_edVotfinm0DdJ7mHFPjvmA16xtlafXV1oWvwmnM4pL_NiERBUF-KoQFQayxCWT2t78wAAAAH5OFoHAA"
+SESSION = "PASTE_SESSION_STRING"
 
 SOURCE = -1001912679284
-DESTINATIONS = [-1003798031630]
+DEST = -1003798031630
 
 app = Client(
-    "separate-forwarder",
-    session_string=SESSION_STRING,
+    "render-forwarder",
     api_id=API_ID,
-    api_hash=API_HASH
+    api_hash=API_HASH,
+    session_string=SESSION
 )
 
 @app.on_message(filters.chat(SOURCE))
 async def forward(client, message):
-    for dest in DESTINATIONS:
-        try:
-            await message.copy(dest)
-            print(f"Forwarded {message.id}")
-            await asyncio.sleep(0.3)
-        except Exception as e:
-            print(e)
+    try:
+        await message.copy(DEST)
+        print("Forwarded")
+    except Exception as e:
+        print(e)
 
-print("Separate Forwarder Running")
+# fake web server (important for free plan)
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'OK')
+
+def run_web():
+    server = HTTPServer(('0.0.0.0', 10000), Handler)
+    server.serve_forever()
+
+threading.Thread(target=run_web).start()
+
+print("Render Forwarder Running")
 app.run()
